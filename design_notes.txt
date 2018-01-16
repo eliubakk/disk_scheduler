@@ -1,0 +1,20 @@
+Call cpu::boot(thread_startfunc_t func, void *arg, unsigned int deterministic); once. func is a function that takes arg as an argument. The cpu will run deterministically if not set to zero.
+
+Disk scheduler can contain at most max_disk_queue requests.
+A number of requester threads and one service thread. 
+A requester thread must wait until the service threads handles its request before it can issue its next request
+The service thread will pick the request that is closest to its current track.
+Disk is initialized with its track to 0.
+Service thread should only handle a request when the disk queue is full. The disk queue is full when equal to max_disk_queue, or equal to the number of requester threads if the number of requester threads is less than max_disk_queue.
+
+Command line Input:
+	max_disk_queue
+	[list of input files]
+
+Input file:
+	each line specifies the track number of the request (0 to 999)
+
+Output:
+	print_request(requester, track) after a requester issues a request.
+	print_service(requester, track) after a request is serviced.
+
