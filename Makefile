@@ -13,8 +13,7 @@ TESTS = $(TESTSOURCES:%.cpp=%)
 
 SOURCES = $(wildcard *.cpp)
 SOURCES := $(filter-out $(TESTSOURCES), $(SOURCES))
-
-HEADERS = 
+OBJECTS = $(SOURCES:%.cpp=%.o)
 
 all: $(EXECUTABLE)
 
@@ -24,23 +23,31 @@ release: all
 debug: CXXFLAGS += $(DEBUGFLAGS)
 debug: clean all
 
-$(EXECUTABLE): $(SOURCES) $(HEADERS)
-	$(CXX) $(CXXFLAGS) $(SOURCES) $(HEADERS) $(LIBS) -o $(EXECUTABLE).exe
+$(EXECUTABLE): $(OBJECTS) #$(SOURCES) $(HEADERS)
+	$(CXX) $(CXXFLAGS) $(OBJECTS) $(LIBS) -o $(EXECUTABLE).exe
+
+%.o: %.cpp
+	$(CXX) $$(CXXFLAGS) -c $*.cpp
+
 
 define make_tests
     SRCS = $$(filter-out $$(PROJECTFILE), $$(SOURCES))
+    OBJS = $$(SRCS:%.cpp=%.o)
     HDRS = $$(wildcard *.h)
     $(1): CXXFLAGS += $$(DEBUGFLAGS)
-    $(1): $$(HDRS) $(1).cpp
-	$$(CXX) $$(CXXFLAGS) $$(LIBS) $(1).cpp -o $(1).exe
+    $(1): $$(HDRS) $$(OBJS) $(1).cpp
+	$$(CXX) $$(CXXFLAGS) $$(LIBS) $$(OBJS) $(1).cpp -o $(1).exe
 endef
 $(foreach test, $(TESTS), $(eval $(call make_tests, $(test))))
 
 alltests: clean $(TESTS)
 
+servicer.o: servicer.h servicer.cpp
+requester.o: requester.h requester.cpp
+
 
 clean: 
-	rm -f $(EXECUTABLE) $(TESTS)
-
+	rm -f $(OBJECTS) $(EXECUTABLE) $(TESTS)
 
 .PHONY: all clean alltests debug release
+.SUFFIXES:
