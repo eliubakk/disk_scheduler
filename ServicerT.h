@@ -5,12 +5,21 @@ for EECS 482 Project 1 Winter 2018 at UofM
 #ifndef SERVICER_T_H
 #define SERVICER_T_H
 
-class ServicerT{
-	public:
-		ServicerT();
+#include "DiskSchedulerShared.h"
+#include "Request.h"
 
-		void start(void* max_disk_queue);
- 
-};
+namespace DiskScheduler{
+	class ServicerT{
+		public:
+			ServicerT();
+
+			void start(void* _commands);
+
+		private:
+			unsigned int curr_track;
+			Request* closest_request();
+
+	};
+}
 
 #endif

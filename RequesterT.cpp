@@ -1,3 +1,7 @@
+/*
+This code was written by Erik Liubakka (eliubakk)
+for EECS 482 Project 1 Winter 2018 at UofM
+*/
 #include "RequesterT.h"
 #include "disk.h"
 #include <fstream>
@@ -27,7 +31,9 @@ namespace DiskScheduler{
 					queue_not_full_cv.wait(disk_queue_mutex);
 				}
 				disk_queue.push_back(current_request);
+				print_mutex.lock();
 				print_request(id, current_request->track);
+				print_mutex.unlock();
 				disk_queue_mutex.unlock();
 
 				//wait until request is handled

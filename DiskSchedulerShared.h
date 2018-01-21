@@ -15,7 +15,12 @@ namespace DiskScheduler{
 	extern cv queue_full_cv;
 	extern cv queue_not_full_cv;
 	extern unsigned int requesters_alive;
-	extern mutex requesters_alive_mutex;
 	extern cv requester_finished;
+	extern mutex print_mutex;
+
+	struct Commands{
+		int argc;
+		char** argv;
+	};
 }
 #endif
