@@ -13,7 +13,7 @@ namespace DiskScheduler{
 		public:
 			ServicerT();
 
-			void start(void* _commands);
+			void operator()(void* _max_disk_queue);
 
 		private:
 			unsigned int curr_track;

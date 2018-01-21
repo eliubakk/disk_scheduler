@@ -16,7 +16,7 @@ namespace DiskScheduler{
 		public:
 			RequesterT(unsigned int id, unsigned int max_disk_queue);
 
-			void start(void* file);
+			void operator()(void* file);
 
 		private:
 			unsigned int id;

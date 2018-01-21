@@ -1,5 +1,6 @@
 #include <iostream>
 #include "thread.h"
+#include "SchedulerT.h"
 
 using namespace std;
 
@@ -38,8 +39,9 @@ using namespace std;
 
 
 
-int main(int argc, char* agrv[])
+int main(int argc, char* argv[])
 {
-
-    //cpu::boot((thread_startfunc_t) parent, (void *) 100, 0);
+	DiskScheduler::Commands args{(unsigned int)argc, argv};
+	DiskScheduler::SchedulerT scheduler;
+    cpu::boot((thread_startfunc_t) &scheduler, (void *) &args, 1);
 }

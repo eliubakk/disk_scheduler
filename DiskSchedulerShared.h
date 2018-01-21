@@ -17,10 +17,5 @@ namespace DiskScheduler{
 	extern unsigned int requesters_alive;
 	extern cv requester_finished;
 	extern mutex print_mutex;
-
-	struct Commands{
-		int argc;
-		char** argv;
-	};
 }
 #endif

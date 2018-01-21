@@ -13,7 +13,7 @@ namespace DiskScheduler{
 		RequesterT::RequesterT(unsigned int _id, unsigned int _max_disk_queue):
 			id(_id), max_disk_queue(_max_disk_queue){}
 
-		void RequesterT::start(void* file){
+		void RequesterT::operator()(void* file){
 			read_requests(*((string*)file));
 
 			while(!requests.empty()){
@@ -45,7 +45,10 @@ namespace DiskScheduler{
 			}
 
 			//TODO: Signal that thread is dead...
+			disk_queue_mutex.lock();
+			--requesters_alive;
 			requester_finished.broadcast();
+			disk_queue_mutex.unlock();
 		}
 
 		void RequesterT::read_requests(string f_name){

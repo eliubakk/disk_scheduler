@@ -13,15 +13,7 @@ using namespace std;
 namespace DiskScheduler{
 	ServicerT::ServicerT() : curr_track(0) {}
 
-	void ServicerT::start(void* _max_disk_queue){
-		/*Commands commands = *((Commands*)_commands);
-		if(commands.argc < 3)
-			return;
-		unsigned int max_disk_queue = (unsigned int)atoi(commands.argc[1]);
-		vector<RequesterT> rThreads(commands.argc - 2);
-		for(unsigned int i = 2; i < commands.argc; ++i){
-			rThreads.push()
-		}*/
+	void ServicerT::operator()(void* _max_disk_queue){
 		unsigned int max_disk_queue = *((unsigned int*)_max_disk_queue);
 
 		while(true){

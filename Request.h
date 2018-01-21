@@ -7,12 +7,14 @@ for EECS 482 Project 1 Winter 2018 at UofM
 
 #include "thread.h"
 
-struct Request{
-	unsigned int requester_id;
-	unsigned short track;
-	mutex mut; 
-	cv* serviced;
-	bool handled;
-};
+namespace DiskScheduler{
+	struct Request{
+		unsigned int requester_id;
+		unsigned short track;
+		mutex mut; 
+		cv* serviced;
+		bool handled;
+	};
+}
 
 #endif

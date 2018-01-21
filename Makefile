@@ -2,7 +2,7 @@ CXX = g++
 CXXFLAGS = -g -std=c++11 -Wall
 DEBUGFLAGS = -DDEBUG
 
-LIBS = libthread.o -ldl -pthread
+LIBS = DiskSchedulerShared.h libthread.o -ldl -pthread
 
 EXECUTABLE = scheduler
 
@@ -24,11 +24,10 @@ debug: CXXFLAGS += $(DEBUGFLAGS)
 debug: clean all
 
 $(EXECUTABLE): $(OBJECTS) #$(SOURCES) $(HEADERS)
-	$(CXX) $(CXXFLAGS) $(OBJECTS) $(LIBS) -o $(EXECUTABLE).exe
+	$(CXX) $(CXXFLAGS) $(OBJECTS) $(LIBS) -o $(EXECUTABLE)
 
 %.o: %.cpp
-	$(CXX) $(CXXFLAGS) -c $*.cpp $*.h -o $*.o
-
+	$(CXX) $(CXXFLAGS) -c $*.cpp
 
 define make_tests
     SRCS = $$(filter-out $$(PROJECTFILE), $$(SOURCES))
@@ -42,8 +41,11 @@ $(foreach test, $(TESTS), $(eval $(call make_tests, $(test))))
 
 alltests: clean $(TESTS)
 
-ServicerT.o: ServicerT.h ServicerT.cpp
-RequesterT.o: RequesterT.h RequesterT.cpp
+DiskSchedulerShared.o: DiskSchedulerShared.h DiskSchedulerShared.cpp
+ServicerT.o: ServicerT.h ServicerT.cpp DiskSchedulerShared.o
+RequesterT.o: RequesterT.h RequesterT.cpp DiskSchedulerShared.o
+SchedulerT.o: SchedulerT.h SchedulerT.cpp ServicerT.o RequesterT.o DiskSchedulerShared.o
+scheduler.o: DiskSchedulerShared.h scheduler.cpp SchedulerT.o 
 
 
 clean: 
