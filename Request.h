@@ -8,8 +8,8 @@ for EECS 482 Project 1 Winter 2018 at UofM
 #include "thread.h"
 
 struct Request{
-	int requester_id;
-	short track;
+	unsigned int requester_id;
+	unsigned short track;
 	mutex mut; 
 	cv* serviced;
 	bool handled;

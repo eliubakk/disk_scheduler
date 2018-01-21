@@ -14,7 +14,7 @@ namespace DiskScheduler{
 	extern mutex disk_queue_mutex;
 	extern cv queue_full_cv;
 	extern cv queue_not_full_cv;
-	extern int requesters_alive;
+	extern unsigned int requesters_alive;
 	extern mutex requesters_alive_mutex;
 	extern cv requester_finished;
 }

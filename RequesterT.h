@@ -13,18 +13,18 @@ for EECS 482 Project 1 Winter 2018 at UofM
 
 namespace DiskScheduler{
 	class RequesterT{
-	public:
-		RequesterT(int id, int max_disk_queue);
+		public:
+			RequesterT(unsigned int id, unsigned int max_disk_queue);
 
-		void start(void* file);
+			void start(void* file);
 
-	private:
-		int id;
-		int max_disk_queue;
-		cv serviced;
-		std::queue<Request> requests;
+		private:
+			unsigned int id;
+			unsigned int max_disk_queue;
+			cv serviced;
+			std::queue<Request*> requests;
 
-		void read_requests(string file);
+			void read_requests(std::string f_name);
 	};
 }
 

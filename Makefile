@@ -27,7 +27,7 @@ $(EXECUTABLE): $(OBJECTS) #$(SOURCES) $(HEADERS)
 	$(CXX) $(CXXFLAGS) $(OBJECTS) $(LIBS) -o $(EXECUTABLE).exe
 
 %.o: %.cpp
-	$(CXX) $$(CXXFLAGS) -c $*.cpp
+	$(CXX) $(CXXFLAGS) -c $*.cpp $*.h -o $*.o
 
 
 define make_tests
@@ -42,8 +42,8 @@ $(foreach test, $(TESTS), $(eval $(call make_tests, $(test))))
 
 alltests: clean $(TESTS)
 
-servicer.o: servicer.h servicer.cpp
-requester.o: requester.h requester.cpp
+ServicerT.o: ServicerT.h ServicerT.cpp
+RequesterT.o: RequesterT.h RequesterT.cpp
 
 
 clean: 

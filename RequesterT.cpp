@@ -1,17 +1,21 @@
 #include "RequesterT.h"
+#include "disk.h"
 #include <fstream>
+
+using namespace std;
 
 namespace DiskScheduler{
 
-		RequesterT::RequesterT(int _id, int _max_disk_queue):
-			id(_id), max_disk_queue(_max_disk_queue), requests(0){}
+		RequesterT::RequesterT(unsigned int _id, unsigned int _max_disk_queue):
+			id(_id), max_disk_queue(_max_disk_queue){}
 
 		void RequesterT::start(void* file){
 			read_requests(*((string*)file));
 
 			while(!requests.empty()){
 				//pop next request
-				Request* current_request = requests.pop();
+				Request* current_request = requests.front(); 
+				requests.pop();
 
 				//try to put request into queue
 				disk_queue_mutex.lock();
@@ -19,8 +23,8 @@ namespace DiskScheduler{
 					|| (requesters_alive < max_disk_queue
 						&& disk_queue.size() == requesters_alive)){
 					//signal servicer that queue is full
-					queue_not_full_cv.signal();
-					queue_full_cv.wait(disk_queue_mutex);
+					queue_full_cv.signal();
+					queue_not_full_cv.wait(disk_queue_mutex);
 				}
 				disk_queue.push_back(current_request);
 				print_request(id, current_request->track);
@@ -29,13 +33,26 @@ namespace DiskScheduler{
 				//wait until request is handled
 				current_request->mut.lock();
 				while(!current_request->handled){
-					serviced.wait(current_request->mut)
+					serviced.wait(current_request->mut);
 				}
 				delete current_request;
 			}
 
 			//TODO: Signal that thread is dead...
+			requester_finished.broadcast();
 		}
 
-		void RequesterT::read_requests(string file);
+		void RequesterT::read_requests(string f_name){
+			ifstream disk = ifstream(f_name);
+			unsigned short track;
+			while(disk >> track){
+				Request* request = new Request{id, track, mutex(), &serviced, false};
+				/*request->requester_id = id;
+				request->track = track;
+				request->serviced = &serviced;
+				request->handled = false;*/
+				requests.push(request);
+			}
+			disk.close();
+		}
 }
