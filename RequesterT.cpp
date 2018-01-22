@@ -60,7 +60,7 @@ namespace DiskScheduler{
 	}
 
 	void RequesterT::read_requests(string f_name){
-		ifstream disk = ifstream(f_name);
+		ifstream disk(f_name);
 		unsigned short track;
 		while(disk >> track){
 			Request* request = new Request{id, track, mutex(), &serviced, false};
