@@ -19,10 +19,6 @@ namespace DiskScheduler{
 		id(_id), max_disk_queue(_max_disk_queue){}
 
 	void RequesterT::operator()(string file){
-		//print_mutex.lock();
-		//cout << "Requester thread started" << endl;
-		//print_mutex.unlock();
-
 		read_requests(file);
 
 		while(!requests.empty()){
@@ -32,9 +28,8 @@ namespace DiskScheduler{
 
 			//try to put request into queue
 			disk_queue_mutex.lock();
-			while(disk_queue.size() == max_disk_queue 
-				|| (requesters_alive < max_disk_queue
-					&& disk_queue.size() == requesters_alive)){
+			while(disk_queue.size() == requesters_alive ||
+				  disk_queue.size() == max_disk_queue){
 				//signal servicer that queue is full
 				queue_full_cv.signal();
 				queue_not_full_cv.wait(disk_queue_mutex);
@@ -42,11 +37,9 @@ namespace DiskScheduler{
 			disk_queue.push_back(current_request);
 			print_mutex.lock();
 			print_request(id, current_request->track);
-			cout << "Requesters Alive: " << requesters_alive << ", Queue size: " << disk_queue.size() << endl;
 			print_mutex.unlock();
-			if(disk_queue.size() == max_disk_queue 
-				|| (requesters_alive < max_disk_queue
-					&& disk_queue.size() == requesters_alive))
+			if(disk_queue.size() == requesters_alive ||
+			   disk_queue.size() == max_disk_queue)
 				queue_full_cv.signal();
 			disk_queue_mutex.unlock();
 
@@ -58,9 +51,10 @@ namespace DiskScheduler{
 			delete current_request;
 		}
 
-		//TODO: Signal that thread is dead...
+		//Thread is dead, update number remaining.
 		disk_queue_mutex.lock();
 		--requesters_alive;
+		queue_not_full_cv.signal();
 		requester_finished.broadcast();
 		disk_queue_mutex.unlock();
 	}
@@ -70,10 +64,6 @@ namespace DiskScheduler{
 		unsigned short track;
 		while(disk >> track){
 			Request* request = new Request{id, track, mutex(), &serviced, false};
-			/*request->requester_id = id;
-			request->track = track;
-			request->serviced = &serviced;
-			request->handled = false;*/
 			requests.push(request);
 		}
 		disk.close();

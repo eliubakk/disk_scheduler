@@ -19,16 +19,11 @@ namespace DiskScheduler{
 	ServicerT::ServicerT() : curr_track(0) {}
 
 	void ServicerT::operator()(unsigned int max_disk_queue){
-		//print_mutex.lock();
-		//cout << "Servicer thread started" << endl;
-		//print_mutex.unlock();
 
 		while(true){
 			disk_queue_mutex.lock();
-			while(requesters_alive != 0 && 
-					((disk_queue.size() < max_disk_queue) ^
-					(requesters_alive < max_disk_queue &&
-			 		disk_queue.size() < requesters_alive))){
+			while(!(disk_queue.size() == requesters_alive ||
+					disk_queue.size() == max_disk_queue)){
 				//wait until queue is full
 				queue_full_cv.wait(disk_queue_mutex);
 			}
@@ -46,7 +41,6 @@ namespace DiskScheduler{
 			request->handled = true;
 			print_mutex.lock();
 			print_service(request->requester_id, request->track);
-			//cout << "Requesters Alive: " << requesters_alive << ", Queue size: " << disk_queue.size() << endl;
 			print_mutex.unlock();
 			request->serviced->signal();
 			request->mut.unlock();
@@ -67,7 +61,8 @@ namespace DiskScheduler{
 			(*it)->mut.lock();
 
 			//check if it is closer than closest
-			if(abs((*it)->track - curr_track) < abs((*closest)->track - curr_track)){
+			if(abs((signed int)(*it)->track - (signed int)curr_track) <
+			   abs((signed int)(*closest)->track - (signed int)curr_track)){
 				//unlock closest, update
 				(*closest)->mut.unlock();
 				closest = it;

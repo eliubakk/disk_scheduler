@@ -53,8 +53,10 @@ namespace DiskScheduler{
 		disk_queue_mutex.lock();
 		while(requesters_alive != 0){
 			requester_finished.wait(disk_queue_mutex);
-			if(requesters_alive < max_disk_queue
-					&& disk_queue.size() == requesters_alive){
+			if(requesters_alive != 0 && 
+					((disk_queue.size() < max_disk_queue) ^
+					(requesters_alive < max_disk_queue &&
+			 		disk_queue.size() < requesters_alive))) {
 				queue_full_cv.signal();
 			}	
 		}
