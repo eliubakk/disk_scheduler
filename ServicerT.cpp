@@ -7,19 +7,26 @@ for EECS 482 Project 1 Winter 2018 at UofM
 #include <vector>
 #include <cstdlib>
 #include <cmath>
+#include <iostream>
 
 using namespace std;
 
 namespace DiskScheduler{
+	void ServicerStart(void* args){
+		((ServicerStartArgs*)args)->t(((ServicerStartArgs*)args)->max_disk_queue);
+	}
+
 	ServicerT::ServicerT() : curr_track(0) {}
 
-	void ServicerT::operator()(void* _max_disk_queue){
-		unsigned int max_disk_queue = *((unsigned int*)_max_disk_queue);
+	void ServicerT::operator()(unsigned int max_disk_queue){
+		//print_mutex.lock();
+		//cout << "Servicer thread started" << endl;
+		//print_mutex.unlock();
 
 		while(true){
 			disk_queue_mutex.lock();
 			while(requesters_alive != 0 && 
-					(disk_queue.size() < max_disk_queue ||
+					((disk_queue.size() < max_disk_queue) ^
 					(requesters_alive < max_disk_queue &&
 			 		disk_queue.size() < requesters_alive))){
 				//wait until queue is full
@@ -31,7 +38,7 @@ namespace DiskScheduler{
 
 			//get request off queue
 			Request* request = closest_request();
-			disk_queue_mutex.unlock();
+			queue_not_full_cv.signal();
 
 			//service request
 			request->mut.lock();
@@ -39,9 +46,11 @@ namespace DiskScheduler{
 			request->handled = true;
 			print_mutex.lock();
 			print_service(request->requester_id, request->track);
+			//cout << "Requesters Alive: " << requesters_alive << ", Queue size: " << disk_queue.size() << endl;
 			print_mutex.unlock();
 			request->serviced->signal();
 			request->mut.unlock();
+			disk_queue_mutex.unlock();
 		}
 	}
 

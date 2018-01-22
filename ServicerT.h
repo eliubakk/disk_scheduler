@@ -9,16 +9,24 @@ for EECS 482 Project 1 Winter 2018 at UofM
 #include "Request.h"
 
 namespace DiskScheduler{
+
+	void ServicerStart(void* args);
+
 	class ServicerT{
 		public:
 			ServicerT();
 
-			void operator()(void* _max_disk_queue);
+			void operator()(unsigned int max_disk_queue);
 
 		private:
 			unsigned int curr_track;
 			Request* closest_request();
 
+	};
+
+	struct ServicerStartArgs{
+		ServicerT t;
+		unsigned int max_disk_queue;
 	};
 }
 
