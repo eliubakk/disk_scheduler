@@ -11,7 +11,6 @@ namespace DiskScheduler{
 	struct Request{
 		unsigned int requester_id;
 		unsigned short track;
-		mutex mut; 
 		cv* serviced;
 		bool handled;
 	};

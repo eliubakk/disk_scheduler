@@ -33,17 +33,15 @@ namespace DiskScheduler{
 
 			//get request off queue
 			Request* request = closest_request();
-			queue_not_full_cv.signal();
 
 			//service request
-			request->mut.lock();
 			curr_track = request->track;
 			request->handled = true;
 			print_mutex.lock();
 			print_service(request->requester_id, request->track);
 			print_mutex.unlock();
 			request->serviced->signal();
-			request->mut.unlock();
+			queue_not_full_cv.signal();
 			disk_queue_mutex.unlock();
 		}
 	}
@@ -51,29 +49,22 @@ namespace DiskScheduler{
 	Request* ServicerT::closest_request(){
 		//assume first is closest
 		auto closest = disk_queue.begin();
-		(*closest)->mut.lock();
 
 		//compare to each request
 		for(auto it = disk_queue.begin(); it != disk_queue.end(); ++it){
 			if(closest == it){
 				continue;
 			}
-			(*it)->mut.lock();
 
 			//check if it is closer than closest
 			if(abs((signed int)(*it)->track - (signed int)curr_track) <
 			   abs((signed int)(*closest)->track - (signed int)curr_track)){
 				//unlock closest, update
-				(*closest)->mut.unlock();
 				closest = it;
-			}
-			else{
-				(*it)->mut.unlock();
 			}
 		}
 		Request* next = (*closest);
 		disk_queue.erase(closest);
-		next->mut.unlock();
 		return next;
 	}
 }

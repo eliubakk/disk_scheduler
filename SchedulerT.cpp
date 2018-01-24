@@ -20,10 +20,6 @@ namespace DiskScheduler{
 	SchedulerT::SchedulerT(){}
 
 	void SchedulerT::operator()(Commands commands){
-		//print_mutex.lock();
-		//cout << "SchedulerT started" << endl;
-		//print_mutex.unlock();
-
 		if(commands.argc < 3)
 			return;
 		unsigned int max_disk_queue = (unsigned int)atoi(commands.argv[1]);
@@ -36,27 +32,19 @@ namespace DiskScheduler{
 			disk_queue_mutex.lock();
 			++requesters_alive;
 			disk_queue_mutex.unlock();
-			//print_mutex.lock();
-			//cout << "Starting requester " + (i - 2) << endl;
-			//print_mutex.unlock();
 			rThreads.emplace_back(
 				(thread_startfunc_t)RequesterStart,
 				(void*)&requesters.back()
 			);
 		}
 		ServicerStartArgs servicerArgs{ServicerT(), max_disk_queue};
-		//print_mutex.lock();
-		//cout << "Starting servicer thread" << endl;
-		//print_mutex.unlock();
 		thread sThread((thread_startfunc_t)ServicerStart, 
 						(void*)&servicerArgs);
 		disk_queue_mutex.lock();
 		while(requesters_alive != 0){
 			requester_finished.wait(disk_queue_mutex);
-			if(requesters_alive != 0 && 
-					((disk_queue.size() < max_disk_queue) ^
-					(requesters_alive < max_disk_queue &&
-			 		disk_queue.size() < requesters_alive))) {
+			if(disk_queue.size() == requesters_alive ||
+			   disk_queue.size() == max_disk_queue) {
 				queue_full_cv.signal();
 			}	
 		}

@@ -41,21 +41,19 @@ namespace DiskScheduler{
 			if(disk_queue.size() == requesters_alive ||
 			   disk_queue.size() == max_disk_queue)
 				queue_full_cv.signal();
-			disk_queue_mutex.unlock();
-
 			//wait until request is handled
-			current_request->mut.lock();
 			while(!current_request->handled){
-				serviced.wait(current_request->mut);
+				serviced.wait(disk_queue_mutex);
 			}
 			delete current_request;
+			disk_queue_mutex.unlock();
 		}
 
 		//Thread is dead, update number remaining.
 		disk_queue_mutex.lock();
 		--requesters_alive;
 		queue_not_full_cv.signal();
-		requester_finished.broadcast();
+		requester_finished.signal();
 		disk_queue_mutex.unlock();
 	}
 
@@ -63,7 +61,7 @@ namespace DiskScheduler{
 		ifstream disk(f_name);
 		unsigned short track;
 		while(disk >> track){
-			Request* request = new Request{id, track, mutex(), &serviced, false};
+			Request* request = new Request{id, track, &serviced, false};
 			requests.push(request);
 		}
 		disk.close();
